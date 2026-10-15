@@ -1,0 +1,16 @@
+{
+  "name": "chatbot-sekolah",
+  "version": "1.0.0",
+  "description": "Website sekolah dengan widget chatbot berbasis Gemini",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@google/genai": "latest",
+    "dotenv": "latest",
+    "express": "^4.19.2"
+  }
+}
