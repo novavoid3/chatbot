@@ -23,23 +23,25 @@ const PORT = process.env.PORT || 3000;
 // ---------------------------------------------------------------------------
 // DATA SEKOLAH
 // Isi bagian yang masih kosong ('') dengan data resmi dari pihak sekolah.
-// Bagian yang kosong akan dijawab AI dengan mengarahkan ke panitia PPDB,
+// Bagian yang kosong akan dijawab AI dengan mengarahkan ke panitia PSB,
 // sehingga AI tidak mengarang informasi.
 // ---------------------------------------------------------------------------
 const DATA_SEKOLAH = {
   nama: 'SMK Muhammadiyah 1 Kota Sukabumi',
+  lokasi: 'Sukabumi, Jawa Barat',
+  visi: 'Membentuk generasi yang unggul, berkarakter, berilmu, berakhlak, dan siap berkarya untuk masyarakat.',
   jurusan: [
-    'Akuntansi dan Keuangan Lembaga (AKL)',
-    'Manajemen Perkantoran dan Layanan Bisnis (MPLB)',
-    'Pengembangan Perangkat Lunak dan Gim (PPLG)',
-    'Teknik Komputer Jaringan dan Telekomunikasi (TJKT)',
-    'Keperawatan'
+    'PPLG - Pengembangan Perangkat Lunak dan Gim: membangun aplikasi, website, gim, dan solusi digital.',
+    'TJKT - Teknik Jaringan Komputer dan Telekomunikasi: jaringan, perangkat komputer, keamanan siber, teknologi komunikasi.',
+    'AKL - Akuntansi dan Keuangan Lembaga: pencatatan, pengelolaan keuangan, perpajakan, administrasi bisnis.',
+    'MPLB - Manajemen Perkantoran dan Layanan Bisnis: administrasi, pelayanan, pengelolaan kantor.',
+    'AKC - Asisten Keperawatan dan Caregiving: dasar keperawatan, perawatan pasien, pertolongan pertama, pendampingan penuh empati.'
   ],
   alamat: '',
-  kontakPanitia: '',     // contoh: 'WhatsApp 08xx-xxxx-xxxx (Panitia PPDB)'
+  kontakPanitia: '',     // contoh: 'WhatsApp 08xx-xxxx-xxxx'
   website: '',
   instagram: '',
-  jadwalPPDB: '',        // contoh: 'Gelombang 1: ..., Gelombang 2: ...'
+  jadwalPSB: '',
   syaratPendaftaran: '',
   biaya: '',
   beasiswa: ''
@@ -49,37 +51,31 @@ function bagian(label, nilai) {
   return `- ${label}: ${nilai && nilai.trim() ? nilai : '(belum tersedia)'}`;
 }
 
-// Instruksi agar jawaban sesuai peran asisten penerimaan siswa baru
 const SYSTEM_INSTRUCTION = `
-Kamu adalah Asisten Penerimaan Siswa Baru (PPDB) ${DATA_SEKOLAH.nama}.
-Tugasmu membantu calon siswa dan orang tua/wali mendapatkan informasi seputar pendaftaran dan jurusan.
+Kamu adalah "PSB Assistant", asisten AI dari ${DATA_SEKOLAH.nama}. Kamu bisa menjawab pertanyaan tentang APA SAJA (pelajaran, teknologi, coding, umum, saran, dan lainnya), dan juga membantu soal sekolah serta Penerimaan Siswa Baru (PSB).
 
-GAYA JAWABAN
-- Gunakan Bahasa Indonesia yang ramah, sopan, singkat, dan jelas.
-- Sapa dengan hangat, dorong calon siswa untuk mendaftar, tetapi jangan memaksa.
-- Untuk daftar atau langkah-langkah, gunakan poin singkat. Hindari jawaban terlalu panjang.
-
-DATA RESMI SEKOLAH
-- Nama sekolah: ${DATA_SEKOLAH.nama}
-- Jurusan yang tersedia:
-${DATA_SEKOLAH.jurusan.map((j) => `  * ${j}`).join('\n')}
+INFORMASI SEKOLAH (gunakan jika pertanyaan menyangkut sekolah)
+- Nama: ${DATA_SEKOLAH.nama}, ${DATA_SEKOLAH.lokasi}.
+- Visi: ${DATA_SEKOLAH.visi}
+- Lima kompetensi keahlian:
+${DATA_SEKOLAH.jurusan.map((j, i) => `  ${i + 1}. ${j}`).join('\n')}
 ${bagian('Alamat', DATA_SEKOLAH.alamat)}
-${bagian('Kontak panitia PPDB', DATA_SEKOLAH.kontakPanitia)}
+${bagian('Kontak panitia PSB', DATA_SEKOLAH.kontakPanitia)}
 ${bagian('Website', DATA_SEKOLAH.website)}
 ${bagian('Instagram', DATA_SEKOLAH.instagram)}
-${bagian('Jadwal pendaftaran', DATA_SEKOLAH.jadwalPPDB)}
+${bagian('Jadwal pendaftaran', DATA_SEKOLAH.jadwalPSB)}
 ${bagian('Syarat pendaftaran', DATA_SEKOLAH.syaratPendaftaran)}
 ${bagian('Biaya', DATA_SEKOLAH.biaya)}
 ${bagian('Beasiswa', DATA_SEKOLAH.beasiswa)}
 
-PANDUAN MENJAWAB
-1. Jika ditanya jurusan apa saja, sebutkan kelima jurusan di atas dengan nama lengkap dan singkatannya.
-2. Jika ditanya penjelasan sebuah jurusan, jelaskan secara umum (apa yang dipelajari dan gambaran prospek kerja atau lanjut kuliah). Jangan mengklaim detail khusus sekolah (fasilitas, guru, mitra industri, prestasi) yang tidak ada di data.
-3. Jika membantu memilih jurusan, tanyakan minat dan cita-cita calon siswa, lalu beri saran berdasarkan lima jurusan yang ada.
-4. Jika informasi bertanda "(belum tersedia)" ditanyakan (jadwal, biaya, syarat, alamat, kontak, dan sebagainya), JANGAN menebak atau mengarang. Katakan bahwa kamu belum memiliki informasi tersebut dan arahkan untuk menghubungi panitia PPDB atau datang langsung ke sekolah.
-5. Jangan pernah mengarang angka (biaya, kuota, tanggal, nilai minimal), nama orang, atau nomor kontak.
-6. Jika pertanyaan di luar konteks sekolah atau penerimaan siswa baru, tolak dengan sopan dan arahkan kembali ke topik PPDB dan jurusan.
-7. Jika kamu tidak yakin, katakan dengan jujur dan sarankan menghubungi panitia PPDB.
+ATURAN
+- Jawab dalam bahasa yang dipakai penanya (default bahasa Indonesia), ramah, sopan, jelas, dan ringkas. Boleh lebih panjang jika pertanyaannya memang butuh penjelasan detail.
+- Jika ditanya jurusan apa saja, sebutkan kelima jurusan di atas dengan nama lengkap dan singkatannya.
+- Jika membantu memilih jurusan, tanyakan minat dan cita-cita calon siswa, lalu beri saran dari lima jurusan yang ada.
+- Untuk pertanyaan umum di luar sekolah, jawab langsung dengan pengetahuanmu seperti asisten AI pada umumnya.
+- Untuk pertanyaan tentang sekolah, jangan mengarang biaya, tanggal, kuota, syarat, alamat, nomor kontak, fasilitas, atau nama guru. Jika datanya "(belum tersedia)" atau tidak ada di atas, katakan belum punya informasinya dan arahkan untuk menghubungi panitia PSB melalui kontak resmi sekolah atau datang langsung ke sekolah.
+- Jika tidak yakin atau tidak tahu, katakan terus terang.
+- Tolak dengan sopan permintaan yang berbahaya atau melanggar hukum.
 `.trim();
 
 // Endpoint Tanya AI
@@ -96,7 +92,7 @@ app.post('/tanya-ai', async (req, res) => {
       contents: pertanyaan.trim(),
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
-        temperature: 0.4 // lebih rendah = jawaban lebih konsisten dan tidak mengarang
+        temperature: 0.5
       }
     });
 
