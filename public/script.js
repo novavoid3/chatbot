@@ -112,52 +112,65 @@
     return wrap;
   }
 
-  /* Hanya berisi informasi yang ada di website. Untuk hal lain, arahkan ke sekolah. */
+  /* Cadangan offline: dipakai HANYA jika server/AI tidak bisa dihubungi. */
   const MAPS = 'https://www.google.com/maps/search/?api=1&query=SMK+Muhammadiyah+1+Kota+Sukabumi';
   const KB = [
     { k: ['alamat', 'lokasi', 'dimana', 'di mana', 'maps', 'peta', 'kontak', 'telepon', 'hubungi'],
       a: 'SMK Muhammadiyah 1 Kota Sukabumi berada di Jl. Syamsudin, S.H. No. 59, Kota Sukabumi, Jawa Barat. Lokasi di peta: ' + MAPS },
-    { k: ['daftar', 'pendaftaran', 'ppdb', 'syarat', 'biaya'],
+    { k: ['daftar', 'pendaftaran', 'ppdb', 'psb', 'syarat', 'biaya'],
       a: 'Untuk info pendaftaran, syarat, dan biaya, silakan datang langsung ke sekolah pada jam kerja agar mendapat informasi yang paling akurat.' },
-    { k: ['jam', 'belajar', 'masuk', 'pulang', 'jadwal'],
-      a: 'Informasi jam belajar belum tercantum di website ini. Silakan tanyakan langsung ke sekolah pada jam kerja ya.' },
-    { k: ['ekstra', 'ekskul', 'minat', 'bakat', 'kegiatan'],
-      a: 'Sekolah menyediakan kegiatan Minat & Bakat untuk mencoba hal baru dan mengasah potensi siswa. Daftar lengkap kegiatannya bisa ditanyakan langsung ke sekolah.' },
+    { k: ['jurusan', 'program', 'keahlian', 'kompetensi'],
+      a: 'Ada 5 kompetensi keahlian: PPLG (Pengembangan Perangkat Lunak dan Gim), TJKT (Teknik Jaringan Komputer dan Telekomunikasi), AKL (Akuntansi dan Keuangan Lembaga), MPLB (Manajemen Perkantoran dan Layanan Bisnis), dan AKC (Asisten Keperawatan dan Caregiving).' },
     { k: ['akreditasi', 'status', 'swasta'],
       a: 'SMK Muhammadiyah 1 Kota Sukabumi adalah sekolah swasta dengan akreditasi A.' },
     { k: ['fasilitas', 'lab', 'laboratorium', 'komputer', 'perpustakaan', 'kelas', 'bahasa'],
       a: 'Fasilitas kami: 13 ruang kelas, 4 laboratorium komputer, serta perpustakaan dan laboratorium bahasa.' },
-    { k: ['kurikulum'],
-      a: 'Sekolah menggunakan Kurikulum 2013, dipadukan dengan pembinaan akhlak dan nilai Kemuhammadiyahan.' },
-    { k: ['studi tour', 'tour', 'yogyakarta', 'jogja', 'silaturahim'],
-      a: 'Ada kegiatan silaturahim dan studi tour rutin, termasuk kunjungan ke Pimpinan Pusat Muhammadiyah di Yogyakarta.' },
-    { k: ['jurusan', 'program keahlian', 'kompetensi'],
-      a: 'Informasi jurusan belum tercantum di website ini. Silakan tanyakan langsung ke sekolah untuk daftar program keahlian terbaru.' },
     { k: ['halo', 'hai', 'hi', 'assalam', 'selamat'],
-      a: 'Halo! Senang kamu mampir. Mau tahu tentang pendaftaran, fasilitas, atau lokasi sekolah?' },
-    { k: ['terima kasih', 'makasih', 'thanks'],
-      a: 'Sama-sama! Kalau ada yang ingin ditanyakan lagi, aku di sini.' }
+      a: 'Halo! Senang kamu mampir. Mau tahu tentang jurusan, pendaftaran, fasilitas, atau lokasi sekolah?' }
   ];
-  const FALLBACK = 'Maaf, aku belum punya jawaban untuk itu. Coba tanyakan langsung ke sekolah di Jl. Syamsudin, S.H. No. 59, Sukabumi pada jam kerja ya.';
+  const FALLBACK = 'Maaf, aku belum bisa menjawab saat ini. Coba lagi sebentar, atau tanyakan langsung ke sekolah di Jl. Syamsudin, S.H. No. 59, Sukabumi pada jam kerja ya.';
 
-  function answer(q) {
+  function offlineAnswer(q) {
     const s = q.toLowerCase();
     const hit = KB.find(item => item.k.some(w => s.includes(w)));
     return hit ? hit.a : FALLBACK;
   }
 
-  function ask(text) {
+  /* Kirim pertanyaan ke server (Gemini) */
+  async function tanyaAI(pertanyaan) {
+    const res = await fetch('/tanya-ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pertanyaan })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.jawaban) throw new Error('Jawaban kosong');
+    return data.jawaban;
+  }
+
+  let sending = false;
+
+  async function ask(text) {
     text = text.trim();
-    if (!text) return;
+    if (!text || sending) return;
+    sending = true;
     addMsg(text, 'user');
     const quick = $('.quick-replies', messages);
     if (quick) quick.remove();
     const typing = addMsg('…', 'bot');
-    const delay = reduce ? 0 : 500 + Math.random() * 400;
-    setTimeout(() => {
-      typing.remove();
-      addMsg(answer(text), 'bot');
-    }, delay);
+
+    let jawaban;
+    try {
+      jawaban = await tanyaAI(text);
+    } catch (err) {
+      console.error('Gagal memanggil /tanya-ai:', err);
+      jawaban = offlineAnswer(text);
+    }
+
+    typing.remove();
+    addMsg(jawaban, 'bot');
+    sending = false;
   }
 
   form.addEventListener('submit', e => {

@@ -37,7 +37,11 @@ const DATA_SEKOLAH = {
     'MPLB - Manajemen Perkantoran dan Layanan Bisnis: administrasi, pelayanan, pengelolaan kantor.',
     'AKC - Asisten Keperawatan dan Caregiving: dasar keperawatan, perawatan pasien, pertolongan pertama, pendampingan penuh empati.'
   ],
-  alamat: '',
+  alamat: 'Jl. Syamsudin, S.H. No. 59, Kota Sukabumi, Jawa Barat',
+  akreditasi: 'Sekolah swasta dengan akreditasi A',
+  fasilitas: '13 ruang kelas, 4 laboratorium komputer, perpustakaan, dan laboratorium bahasa',
+  kurikulum: 'Kurikulum 2013, dipadukan dengan pembinaan akhlak dan nilai Kemuhammadiyahan',
+  kegiatan: 'Kegiatan Minat & Bakat; silaturahim dan studi tour rutin, termasuk kunjungan ke Pimpinan Pusat Muhammadiyah di Yogyakarta',
   kontakPanitia: '',     // contoh: 'WhatsApp 08xx-xxxx-xxxx'
   website: '',
   instagram: '',
@@ -60,6 +64,10 @@ INFORMASI SEKOLAH (gunakan jika pertanyaan menyangkut sekolah)
 - Lima kompetensi keahlian:
 ${DATA_SEKOLAH.jurusan.map((j, i) => `  ${i + 1}. ${j}`).join('\n')}
 ${bagian('Alamat', DATA_SEKOLAH.alamat)}
+${bagian('Akreditasi', DATA_SEKOLAH.akreditasi)}
+${bagian('Fasilitas', DATA_SEKOLAH.fasilitas)}
+${bagian('Kurikulum', DATA_SEKOLAH.kurikulum)}
+${bagian('Kegiatan', DATA_SEKOLAH.kegiatan)}
 ${bagian('Kontak panitia PSB', DATA_SEKOLAH.kontakPanitia)}
 ${bagian('Website', DATA_SEKOLAH.website)}
 ${bagian('Instagram', DATA_SEKOLAH.instagram)}
