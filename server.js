@@ -106,6 +106,11 @@ app.post('/tanya-ai', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server berjalan di http://localhost:${PORT}`);
-});
+// Di Vercel, server dijalankan sebagai serverless function (tanpa listen)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server berjalan di http://localhost:${PORT}`);
+  });
+}
+
+export default app;
